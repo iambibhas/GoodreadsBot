@@ -20,8 +20,8 @@ String.prototype.replaceAll = function(search, replacement) {
 
 var fs = require("fs"), json;
 json_config = getConfig('config.json');
-var key = json_config.key;
-var token = json_config.token;
+var key = process.env.GOODREADS_KEY;
+var token = process.env.GOODREADS_TOKEN;
 
 /*This is the route the API will call*/
 
@@ -30,7 +30,7 @@ app.post('/new-message', function(req, res) {
     try {
         const {message} = req.body
 
-        /* Each message contains "text" and a "chat" object, which has an "id" 
+        /* Each message contains "text" and a "chat" object, which has an "id"
         which is the chat id */
 
         if (message == undefined || !message || message.text == undefined) {
@@ -50,7 +50,7 @@ app.post('/new-message', function(req, res) {
         var book = encodeURI(input_received);
         var data_to_send_back = "Blooming Shore - onstart!";
 
-        /*The url we want is: 
+        /*The url we want is:
         'https://www.goodreads.com/search.xml?key='<key>'&q='<book_name>*/
 
         /*code for an HTTP request */
@@ -71,7 +71,7 @@ app.post('/new-message', function(req, res) {
             /* Now we've receieved all data and we can work with it */
             response.on('end', function() {
                 data_to_send_back = str;
-                
+
                 /* Process data_to_send_back */
 
                 var jsonText = JSON.parse(parser.toJson(data_to_send_back));
@@ -120,7 +120,7 @@ app.post('/new-message', function(req, res) {
                 var authorName = JSON.stringify(topBook.author.name).replaceAll('"','');;
                 var bookDesc = "N/A";
 
-                /* For debugging purposes only 
+                /* For debugging purposes only
                 var url_part_2 = 'www.goodreads.com' + '/book/show/' + bookId + '.xml?key=' + key
                 console.log("Name of the book : " + bookName);
                 console.log("Author of the book: " + authorName);
@@ -130,7 +130,7 @@ app.post('/new-message', function(req, res) {
                 /* Query for the Book's Description using its id
 
                     URL : https://www.goodreads.com/book/show/31128898.xml?key='<key>'
-                    
+
                     */
 
                 var options_new = {
