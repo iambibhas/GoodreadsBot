@@ -19,7 +19,6 @@ String.prototype.replaceAll = function(search, replacement) {
 /* Reading config */
 
 var fs = require("fs"), json;
-json_config = getConfig('config.json');
 var key = process.env.GOODREADS_KEY;
 var token = process.env.GOODREADS_TOKEN;
 
