@@ -7,7 +7,7 @@ const gr_token = process.env.GOODREADS_TOKEN;
 
 bot.on(/^\/book (.+)$/, (msg, props) => {
     const text = props.match[1];
-    console.log(msg.from);
+    console.log(msg);
     console.log(text);
 
     var gr_url = "http://www.goodreads.com/search/index.xml?key=" + gr_key + "&q=" + text;
@@ -34,7 +34,9 @@ bot.on(/^\/book (.+)$/, (msg, props) => {
                             // "\nLibgen URL : http://libgen.io/search.php?lg_topic=libgen&open=0&view=simple&res=25&phrase=1&column=def&req=" + encodeURIComponent(topbook.best_book.title) + "+" + encodeURIComponent(topbook.best_book.author.name) +
                             "\n";
 
-        return bot.sendMessage(msg.from.id, fullMessage, { replyToMessage: msg.message_id })
+        return bot.sendMessage(msg.chat.id, fullMessage).catch((error) => {
+            console.log('Error:', error);
+        });
     })
     // return bot.sendMessage(msg.from.id, text, { replyToMessage: msg.message_id });
 });
