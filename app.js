@@ -13,24 +13,26 @@ function getMessage(topbook) {
     } else {
         rating = topbook.average_rating;
     }
-    var fullMessage = "Name: " + topbook.best_book.title + "\nAuthor: " + topbook.best_book.author.name +
-                        "\nAverage Rating : " + rating +
-                        "\nURL : https://www.goodreads.com/book/show/" + topbook.best_book.id['$t'] +
-                        // "\nLibgen URL : http://libgen.io/search.php?lg_topic=libgen&open=0&view=simple&res=25&phrase=1&column=def&req=" + encodeURIComponent(topbook.best_book.title) + "+" + encodeURIComponent(topbook.best_book.author.name) +
-                        "\n";
+    var fullMessage = `<b>${topbook.best_book.title}</b> (${topbook.publication_year})
+by <i>${topbook.best_book.author.name}</i> - ⭐️ ${rating}
+
+${topbook.description.replace(/\<br \/\>/g, "\n").replace(/<(?:.|\n)*?>/gm, '')}
+
+Goodreads URL: https://www.goodreads.com/book/show/${topbook.best_book.id['$t']}`;
+    console.log(fullMessage);
     return fullMessage;
 }
 
 bot.on(/^\/book (.+)$/, (msg, props) => {
     const text = props.match[1];
     console.log("===================");
-    console.log("New Query: " + text);
+    console.log("New Book Query: " + text);
 
-    redisclient.get(text, function (err, reply) {
+    redisclient.get(text.toLowerCase(), function (err, reply) {
         if (reply === null) {
             // Didn't find any entry in cache
             console.log("cache miss");
-            var gr_url = "http://www.goodreads.com/search/index.xml?key=" + gr_key + "&q=" + text;
+            var gr_url = "http://www.goodreads.com/search/index.xml?key=" + gr_key + "&q=" + encodeURIComponent(text);
             request(gr_url, (error, response, body) => {
                 var json_response = JSON.parse(XML2JSON.toJson(body));
                 var topbook = null;
@@ -42,20 +44,29 @@ bot.on(/^\/book (.+)$/, (msg, props) => {
                 } else { /* More than one book received */
                     topbook = json_response.GoodreadsResponse.search.results.work[0];
                 }
-                // set cache
-                redisclient.set(text, JSON.stringify(topbook));
 
-                var fullMessage = getMessage(topbook);
-                return bot.sendMessage(msg.chat.id, fullMessage).catch((error) => {
-                    console.log('Error:', error);
-                });
-            })
+                var gr_book_details_url = "https://www.goodreads.com/book/show/" + topbook.best_book.id['$t'] + ".xml?key=" + gr_key;
+                request.get(gr_book_details_url, (error, response, body) => {
+                    var json_book_response = JSON.parse(XML2JSON.toJson(body));
+                    topbook.description = json_book_response.GoodreadsResponse.book.description;
+                    topbook.publication_year = json_book_response.GoodreadsResponse.book.publication_year;
+
+                    // set cache
+                    redisclient.set(text.toLowerCase(), JSON.stringify(topbook));
+
+                    var fullMessage = getMessage(topbook);
+
+                    return bot.sendMessage(msg.chat.id, fullMessage, {parseMode: 'HTML'}).catch((error) => {
+                        console.log('Error:', error);
+                    });
+                })
+            });
         } else {
             // cache hit!
             console.log("cache hit");
             topbook = JSON.parse(reply);
             var fullMessage = getMessage(topbook);
-            return bot.sendMessage(msg.chat.id, fullMessage).catch((error) => {
+            return bot.sendMessage(msg.chat.id, fullMessage, {parseMode: 'HTML'}).catch((error) => {
                 console.log('Error:', error);
             });
         }
