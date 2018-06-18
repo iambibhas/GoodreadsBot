@@ -19,7 +19,6 @@ by <i>${topbook.best_book.author.name}</i> - ⭐️ ${rating}
 ${topbook.description.replace(/\<br \/\>/g, "\n").replace(/<(?:.|\n)*?>/gm, '')}
 
 Goodreads URL: https://www.goodreads.com/book/show/${topbook.best_book.id['$t']}`;
-    console.log(fullMessage);
     return fullMessage;
 }
 
