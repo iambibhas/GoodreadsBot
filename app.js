@@ -25,7 +25,6 @@ bot.on(/^\/book (.+)$/, (msg, props) => {
     const text = props.match[1];
     console.log("===================");
     console.log("New Query: " + text);
-    console.log(msg);
 
     redisclient.get(text, function (err, reply) {
         if (reply === null) {
