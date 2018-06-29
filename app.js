@@ -8,15 +8,30 @@ const gr_token = process.env.GOODREADS_TOKEN;
 
 function getMessage(topbook) {
     var rating = 0.0;
-    if (typeof topbook.average_rating == 'object') {
+    if (typeof topbook.average_rating === 'object') {
         rating = topbook.average_rating['$t'];
     } else {
         rating = topbook.average_rating;
     }
-    var fullMessage = `<b>${topbook.best_book.title}</b> (${topbook.publication_year})
+
+    var description = '';
+    if (typeof topbook.description !== 'object') {
+        description = topbook.description;
+    }
+
+    var publication_year = '';
+    if (typeof topbook.publication_year === 'object') {
+        publication_year = topbook.original_publication_year['$t'];
+    } else {
+        publication_year = topbook.publication_year;
+    }
+
+    description = description.replace(/\<br \/\>/g, "\n").replace(/<(?:.|\n)*?>/gm, '');
+
+    var fullMessage = `<b>${topbook.best_book.title}</b> (${publication_year})
 by <i>${topbook.best_book.author.name}</i> - ⭐️ ${rating}
 
-${topbook.description.replace(/\<br \/\>/g, "\n").replace(/<(?:.|\n)*?>/gm, '')}
+${description}
 
 Goodreads URL: https://www.goodreads.com/book/show/${topbook.best_book.id['$t']}`;
     return fullMessage;
