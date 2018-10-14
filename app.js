@@ -26,7 +26,9 @@ function getMessage(topbook) {
         publication_year = topbook.publication_year;
     }
 
-    description = description.replace(/\<br \/\>/g, "\n").replace(/<(?:.|\n)*?>/gm, '');
+    if (description !== undefined) {
+        description = description.replace(/\<br \/\>/g, "\n").replace(/<(?:.|\n)*?>/gm, '');
+    }
 
     var fullMessage = `<b>${topbook.best_book.title}</b> (${publication_year})
 by <i>${topbook.best_book.author.name}</i> - ⭐️ ${rating}
